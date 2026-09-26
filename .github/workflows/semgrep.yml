@@ -1,0 +1,46 @@
+name: semgrep
+
+on:
+  workflow_call:
+
+# Ceiling, not default: must cover what the job requests.
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Semgrep SAST
+        # Only rulesets that apply to this codebase: noise is how a real finding gets
+        # ignored. p/javascript covers the dashboard, p/dockerfile the image.
+        run: |
+          python -m pip install --upgrade pip semgrep
+          semgrep scan \
+            --config p/default \
+            --config p/owasp-top-ten \
+            --config p/secrets \
+            --config p/python \
+            --config p/javascript \
+            --config p/dockerfile \
+            --config p/ci \
+            --sarif --output semgrep.sarif \
+            --error
+
+      - name: Upload SARIF to the Security tab
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        if: always()
+        with:
+          sarif_file: semgrep.sarif

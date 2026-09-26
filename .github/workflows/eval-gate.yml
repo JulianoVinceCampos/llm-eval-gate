@@ -1,0 +1,48 @@
+# The product gating its own repository. This job is what a team would copy into theirs:
+# replay the recorded evidence, compare every candidate with its accepted reference and
+# with the spec, and fail the pull request when a blocking check does not pass.
+#
+# No model, no key, no network: pull requests replay cassettes. New evidence is recorded
+# by `live-eval`, which opens a pull request that this job then gates like any other.
+name: eval-gate
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install (stdlib only, nothing to resolve)
+        run: python -m pip install --upgrade pip && python -m pip install -e .
+
+      - name: Evidence is reproducible
+        run: |
+          llm-eval-gate datasets --check
+          llm-eval-gate fit --check
+
+      - name: The published numbers are the computed numbers
+        run: llm-eval-gate readme --check
+
+      - name: Gate every candidate (writes the job summary)
+        run: |
+          mkdir -p out
+          llm-eval-gate ci --json out/gate.json --markdown out/gate.md
+
+      - name: Keep the verdict as an artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: eval-gate-report
+          path: out/
+          retention-days: 30

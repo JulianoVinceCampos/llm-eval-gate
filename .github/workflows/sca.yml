@@ -1,0 +1,56 @@
+name: sca
+
+on:
+  workflow_call:
+
+# Ceiling, not default: dependency-review comments on the PR, which needs write.
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    # The package has zero runtime dependencies, so this guards the dev and CI surface,
+    # which is where supply-chain attacks actually land.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
+
+  audit:
+    # pip-audit instead of a third-party scanner action: one less action version to track,
+    # and it queries the same OSV/PyPI advisory data for the dev extras.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install the project in an environment of its own
+        # The auditor and the audited live apart. Auditing one environment that holds both
+        # reports the scanner's own dependencies as if they were the project's, and the job
+        # goes red for a package this repository never installs.
+        run: |
+          python -m venv "$RUNNER_TEMP/project"
+          "$RUNNER_TEMP/project/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/project/bin/python" -m pip install -e ".[dev]"
+          "$RUNNER_TEMP/project/bin/python" -m pip freeze --exclude-editable \
+            > "$RUNNER_TEMP/requirements.txt"
+          cat "$RUNNER_TEMP/requirements.txt"
+      - name: Audit exactly what the project installs
+        run: |
+          python -m pip install --upgrade pip pip-audit
+          pip-audit --requirement "$RUNNER_TEMP/requirements.txt" --no-deps --disable-pip --desc

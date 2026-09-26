@@ -1,0 +1,25 @@
+# Conventional Commits -> CHANGELOG -> tag, with no manual version bumping.
+#
+# Requires the repo setting "Allow GitHub Actions to create and approve pull requests"
+# (Settings > Actions > General). Without it the action fails with
+# "GitHub Actions is not permitted to create or approve pull requests".
+name: release
+
+on:
+  push:
+    branches: [main]
+
+# Read-only by default; the one job that writes says so itself.
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          release-type: python

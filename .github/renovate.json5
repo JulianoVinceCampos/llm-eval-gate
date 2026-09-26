@@ -1,0 +1,64 @@
+// Renovate em JSON5 para poder carregar comentário.
+{
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+    // Reescreve tag de action para digest. Tag é ponteiro mutável: quem controla o repo da
+    // action pode reapontar `v4` e executar código arbitrário neste CI. Os workflows já
+    // nascem pinados por SHA; isto mantém o pin andando.
+    "helpers:pinGitHubActionDigests",
+    // Mesmo raciocínio para a imagem base. Sem isto, o digest pinado à mão no Dockerfile
+    // congelaria a imagem: ninguém estaria encarregado de avançá-la.
+    "docker:pinDigests",
+  ],
+
+  schedule: ["before 6am on monday"],
+  prConcurrentLimit: 3,
+
+  // Guarda de supply chain: nada entra antes de o pacote existir há 3 dias. Cobre a janela
+  // em que um pacote comprometido recém-publicado seria adotado sem revisão.
+  minimumReleaseAge: "3 days",
+
+  // O pacote não tem dependência de runtime. O que o Renovate acompanha aqui é o ferramental
+  // de dev (pinado exato no pyproject), as actions, a imagem base e os hooks do pre-commit.
+  "pre-commit": {
+    enabled: true,
+  },
+
+  packageRules: [
+    {
+      // Ferramental de dev agrupado e agendado, nunca com automerge: o toolchain decide o
+      // que o gate reporta, e automergear dependência em repo de um mantenedor troca um
+      // clique por risco.
+      // nosemgrep: package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age
+      description: "Dev tooling grouped and scheduled, never automerged.",
+      matchManagers: ["pep621", "pre-commit"],
+      groupName: "dev tooling",
+      minimumReleaseAge: "3 days",
+    },
+    {
+      // Digest de action agrupado: o churn do pin vira um PR revisável por semana em vez de
+      // um PR por action.
+      // nosemgrep: package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age
+      description: "Action digests grouped into one reviewable PR per week.",
+      matchManagers: ["github-actions"],
+      groupName: "github actions",
+      minimumReleaseAge: "3 days",
+    },
+    {
+      // A imagem base tem a mesma cadência: um PR revisável por semana, sem automerge,
+      // porque trocar a base do runtime merece leitura.
+      // nosemgrep: package_managers.renovate.renovate-missing-minimum-release-age.renovate-missing-minimum-release-age
+      description: "Base image digest in one reviewable PR, never automerged.",
+      matchManagers: ["dockerfile"],
+      groupName: "docker base image",
+      minimumReleaseAge: "3 days",
+    },
+  ],
+
+  // Alerta de vulnerabilidade nunca entra sozinho: exige leitura humana.
+  vulnerabilityAlerts: {
+    labels: ["security"],
+    automerge: false,
+  },
+}

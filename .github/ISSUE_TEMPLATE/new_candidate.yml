@@ -1,0 +1,34 @@
+name: Novo candidato ou provider
+description: Propor um modelo, um provider ou um classificador para ser medido pela régua
+labels: [enhancement, candidate]
+body:
+  - type: textarea
+    id: candidate
+    attributes:
+      label: Candidato
+      description: >-
+        Modelo, provider (ollama, openai-compatible ou outro) e parâmetros de amostragem.
+        Candidato que precisa de chave paga entra como `experimental` e grava pelo
+        `live-eval`; o PR nunca chama modelo.
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Que pergunta a medição responde
+      description: >-
+        Por exemplo: "um modelo de 3B supera as regras no split difícil sem estourar o p95?"
+        Candidato sem pergunta vira número sem leitura.
+    validations:
+      required: true
+
+  - type: textarea
+    id: cost
+    attributes:
+      label: Custo e orçamento
+      description: >-
+        Preço por milhão de tokens de entrada e de saída, e o teto de chamadas e tokens da
+        gravação (`[budget]`).
+    validations:
+      required: false

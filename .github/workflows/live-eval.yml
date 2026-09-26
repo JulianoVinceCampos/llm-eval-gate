@@ -1,0 +1,158 @@
+# Records new evidence from a real model and proposes it as a pull request.
+#
+# Pull requests never talk to a model: they replay the cassette this workflow writes. So
+# the recording happens here, on a GitHub runner, with a pinned Ollama build verified by
+# checksum, and the cassette leaves with a signed provenance attestation of this run
+# instead of the word of whoever ran it on a laptop.
+#
+# The pull request it opens is gated like any other: the new cassette is compared with the
+# accepted reference and blocks if it regressed. Accepting it as the new reference is an
+# explicit input, visible in the diff, never a side effect.
+#
+# CPU only, so a full recording (250 cases x 3 repeats) takes tens of minutes.
+name: live-eval
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: "Candidato LLM a gravar (arquivo em evals/candidates/)"
+        required: true
+        default: ollama-qwen2.5-0.5b
+      accept_reference:
+        description: "Aceitar a gravação como nova referência no mesmo PR"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-eval-${{ inputs.candidate }}
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: write
+      pull-requests: write
+      # Sigstore signing of the cassette attestation.
+      id-token: write
+      attestations: write
+    env:
+      OLLAMA_VERSION: v0.34.4
+      # sha256 of ollama-linux-amd64.tar.zst, from the release's own digest. A new
+      # version is a reviewed change to these two lines, never a moving "latest".
+      OLLAMA_SHA256: c238986e61d40c0cc5f4a9b9e40b9eea104350b77efa34741fc134e105cb9533
+      OLLAMA_MODEL: "qwen2.5:0.5b"
+      CANDIDATE: ${{ inputs.candidate }}
+      ACCEPT: ${{ inputs.accept_reference }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate the input before it reaches a shell
+        run: |
+          if [[ ! "$CANDIDATE" =~ ^[a-z0-9][a-z0-9.-]{0,62}$ ]]; then
+            echo "invalid candidate name: $CANDIDATE"; exit 1
+          fi
+          test -f "evals/candidates/${CANDIDATE}.toml"
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip && python -m pip install -e .
+
+      - name: Install Ollama (pinned release, checksum verified)
+        run: |
+          archive="$RUNNER_TEMP/ollama.tar.zst"
+          curl -fsSL -o "$archive" \
+            "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst"
+          echo "${OLLAMA_SHA256}  ${archive}" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/ollama"
+          tar --zstd -xf "$archive" -C "$RUNNER_TEMP/ollama"
+          echo "$RUNNER_TEMP/ollama/bin" >> "$GITHUB_PATH"
+
+      - name: Start the model server
+        run: |
+          nohup ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/version; then ok=1; break; fi
+            sleep 1
+          done
+          test "${ok:-0}" = "1"
+
+      - name: Pull the model and record its digest
+        run: |
+          ollama pull "$OLLAMA_MODEL"
+          mkdir -p out
+          ollama list | tee out/model.txt
+
+      - name: Record the evidence
+        run: llm-eval-gate run "$CANDIDATE" --mode record
+
+      - name: Gate the new evidence against the accepted reference
+        # The verdict goes into the pull request body; it does not stop the recording.
+        run: |
+          set +e
+          llm-eval-gate gate "$CANDIDATE" > out/gate.md
+          echo "GATE_EXIT=$?" >> "$GITHUB_ENV"
+
+      - name: Accept as the new reference (only when asked)
+        if: env.ACCEPT == 'true'
+        run: |
+          llm-eval-gate accept "$CANDIDATE" --note "Gravação do workflow live-eval: ${RUN_URL}"
+          llm-eval-gate readme
+
+      - name: Attest the recording
+        # Signed provenance for the exact bytes of the cassette: which repository, workflow
+        # and commit produced it. A cassette edited by hand afterwards no longer verifies:
+        #   gh attestation verify evals/cassettes/<candidate>.jsonl --repo <owner>/<repo>
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: evals/cassettes/${{ inputs.candidate }}.jsonl
+
+      - name: Write the pull request body
+        run: |
+          {
+            echo "Nova gravação de \`${CANDIDATE}\` feita pelo workflow live-eval."
+            echo
+            echo "- Execução: ${RUN_URL}"
+            echo "- Ollama ${OLLAMA_VERSION}, modelo \`${OLLAMA_MODEL}\`"
+            echo "- Referência aceita neste PR: ${ACCEPT}"
+            echo "- Saída do gate na gravação: exit ${GATE_EXIT}"
+            echo
+            echo '```'
+            cat out/model.txt
+            echo '```'
+            echo
+            cat out/gate.md
+          } > out/pr-body.md
+
+      - name: Open the pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          # A pull request opened with GITHUB_TOKEN does not trigger pr-ci. LIVE_EVAL_TOKEN
+          # (a fine-grained token with contents and pull-requests write) fixes that; without
+          # it, close and reopen the pull request to run the checks.
+          token: ${{ secrets.LIVE_EVAL_TOKEN || github.token }}
+          sign-commits: true
+          branch: live-eval/${{ inputs.candidate }}
+          delete-branch: true
+          commit-message: "eval: nova gravação de ${{ inputs.candidate }}"
+          title: "eval: nova gravação de ${{ inputs.candidate }}"
+          body-path: out/pr-body.md
+          add-paths: |
+            evals/cassettes/*.jsonl
+            evals/reference/*.json
+            README.md
+
+      - name: Keep the server log when something breaks
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ollama-log
+          path: ${{ runner.temp }}/ollama.log
+          retention-days: 7

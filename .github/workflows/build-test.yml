@@ -1,0 +1,38 @@
+name: build-test
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.11 is the declared floor and 3.13 the current release. The datasets and the
+        # fitted baseline are regenerated on every version below and must match the
+        # committed bytes: that is the proof that the determinism claim holds beyond the
+        # maintainer's laptop.
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install (the package has no runtime dependencies)
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Tests
+        run: python -m pytest
+      - name: Artifacts are what the generators produce
+        run: |
+          llm-eval-gate datasets --check
+          llm-eval-gate fit --check
+      - name: The gate reaches its known verdicts
+        run: llm-eval-gate scenarios

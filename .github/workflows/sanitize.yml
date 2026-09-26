@@ -1,0 +1,52 @@
+# Layer 2 of the pipeline and the only irreversible one. Two independent engines check
+# the generic shapes, so a bug in either does not silently disable the gate, and gitleaks
+# covers credentials across the whole history.
+name: sanitize
+
+on:
+  workflow_call:
+    secrets:
+      # Organisation names (domains, hosts, products), one regex per line. Never in the
+      # repository: a public list of internal names is the leak it is meant to prevent.
+      # Optional: without it (a fork PR, a fresh clone) every generic rule still runs.
+      SANITIZE_DENYLIST:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: a leak in an old commit is still a leak.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Organisation context scan (stdlib, zero dependencies)
+        # A finding from the private list is reported by file and line only: neither the
+        # pattern nor the matched text is printed, because this log is public.
+        env:
+          SANITIZE_DENYLIST: ${{ secrets.SANITIZE_DENYLIST }}
+        run: python3 tools/sanitize_scan.py
+
+      - name: Semgrep leak rules (second engine, same intent)
+        # Semgrep from pip rather than semgrep/semgrep-action: the action pins an
+        # unsupported Semgrep version and expects an app token.
+        run: |
+          python -m pip install --upgrade pip semgrep
+          semgrep scan --config .semgrep/no-corp-leak.yml --error --quiet
+
+      - name: Secret scan across the whole history
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"

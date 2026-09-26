@@ -1,0 +1,104 @@
+# Three stages: cheap and irreversible first, expensive in parallel, evidence last.
+#
+# `sanitize` runs before `lint` on purpose. A style violation is fixed with a commit; a
+# leaked identifier in a public history is permanent. So the check that guards the
+# irreversible mistake is the one that runs first and fails fastest.
+#
+# `eval-gate` is the product running on itself: the same command a user adds to their own
+# pipeline, deciding whether this pull request regressed the classifiers under test.
+name: pr-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only by default. A reusable workflow runs inside the permission envelope of the job
+# that calls it, and GitHub refuses to start the run when a called job asks for more than
+# that envelope holds. So every calling job below declares its envelope explicitly: the
+# ones that only read say so, and the four that write (SARIF upload, PR comment,
+# attestations) widen to exactly what their called workflow needs, nothing above.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # --- stage 1: fail fast, sequential ---------------------------------------------
+  sanitize:
+    uses: ./.github/workflows/sanitize.yml
+    secrets:
+      SANITIZE_DENYLIST: ${{ secrets.SANITIZE_DENYLIST }}
+
+  lint:
+    needs: sanitize
+    uses: ./.github/workflows/lint.yml
+
+  build-test:
+    needs: lint
+    uses: ./.github/workflows/build-test.yml
+
+  # --- stage 2: parallel ----------------------------------------------------------
+  coverage:
+    needs: build-test
+    uses: ./.github/workflows/coverage.yml
+
+  eval-gate:
+    needs: build-test
+    uses: ./.github/workflows/eval-gate.yml
+
+  semgrep:
+    needs: build-test
+    uses: ./.github/workflows/semgrep.yml
+    permissions:
+      contents: read
+      security-events: write
+
+  codeql:
+    needs: build-test
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+  sca:
+    needs: build-test
+    uses: ./.github/workflows/sca.yml
+    permissions:
+      contents: read
+      pull-requests: write
+
+  sonar:
+    needs: coverage
+    uses: ./.github/workflows/sonar.yml
+    # Explicit instead of `secrets: inherit`: the called workflow gets exactly the one
+    # secret it needs. `inherit` hands over every secret in the repo.
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # --- stage 3: evidence ----------------------------------------------------------
+  supply-chain:
+    needs: [coverage, eval-gate, semgrep, codeql, sca]
+    uses: ./.github/workflows/supply-chain.yml
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+
+  ci-status:
+    # Single check to require in branch protection, so adding a job later does not mean
+    # editing the ruleset.
+    needs: [sanitize, lint, build-test, coverage, eval-gate, semgrep, codeql, sca, sonar, supply-chain]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Fail if any upstream job did not succeed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "one or more pipeline stages failed"
+          exit 1
+      - run: echo "pipeline green"

@@ -1,0 +1,37 @@
+name: Bug
+description: Algo se comporta diferente do que a documentação diz
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: O que aconteceu
+      description: Inclua o comando executado, o exit code e a saída.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: O que era esperado
+    validations:
+      required: true
+
+  - type: textarea
+    id: input
+    attributes:
+      label: Entrada mínima que reproduz
+      description: >-
+        O candidato (TOML), o trecho de spec ou de política, e o caso que dispara o
+        comportamento. Remova qualquer coisa real: hostnames, endereços, ids de conta, nomes
+        de cliente. Se o bug só aparece com conteúdo sensível, descreva a forma dele.
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Versão e Python
+      placeholder: "llm-eval-gate 0.1.0, Python 3.12.4"
+    validations:
+      required: true
