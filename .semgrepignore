@@ -1,0 +1,8 @@
+# Sem este arquivo o Semgrep aplica uma lista padrão que pula tests/ e .semgrep/ inteiros.
+# Para as regras de vazamento isso seria um buraco: um identificador real num teste vaza do
+# mesmo jeito que num módulo, e a segunda engine do gate de sanitização não o veria. Então a
+# lista é explícita e herda só o que o git já ignora (caches, artefatos locais, .env).
+#
+# O SAST também passa a ler os testes. Código de teste não é distribuído, mas é código que
+# roda no CI com o token do job, e um achado nele merece a mesma leitura.
+:include .gitignore

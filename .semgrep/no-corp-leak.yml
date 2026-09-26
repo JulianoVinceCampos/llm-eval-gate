@@ -1,0 +1,76 @@
+# Segunda engine do gate de sanitização.
+#
+# tools/sanitize_scan.py é o gate rápido, sem dependência, que roda em todo commit. Estas
+# regras rodam no CI por cima dele: mesma intenção, outra engine, para que um bug em uma
+# não desligue a verificação em silêncio. É defesa em profundidade para o único erro deste
+# repositório que não se desfaz: um vazamento no histórico público do git.
+#
+# Aqui ficam só as formas genéricas (ids de nuvem, documentos fiscais, endereços privados).
+# Nomes da organização (domínios, hosts, produtos) não são publicados em regra nenhuma: uma
+# lista pública de nomes internos é o próprio vazamento que ela deveria impedir. Eles vêm
+# de um secret do CI e de um arquivo local ignorado pelo git, e só o scanner stdlib os lê.
+#
+# As duas engines precisam concordar sobre o que é permitido, ou uma reprova o placeholder
+# que a outra aceita (aconteceu no postmortem-miner, com o próprio 000000000000):
+#
+# - A lista `exclude` de cada regra espelha SELF_EXEMPT em tools/sanitize_scan.py. São só os
+#   arquivos que contêm os padrões por definição: o scanner, estas regras e a config do
+#   gitleaks. Os testes montam as fixtures em tempo de execução e não ficam isentos. A barra
+#   inicial ancora o caminho na raiz do repositório, que é como o Semgrep passa a
+#   interpretar esses padrões.
+# - O .semgrepignore da raiz existe para que tests/ seja varrido: sem ele, a lista padrão do
+#   Semgrep pula a pasta inteira.
+# - Placeholders documentados saem por `pattern-not-regex`, no lugar da ALLOWLIST do
+#   scanner stdlib. O `sanitize-ok` de lá não tem equivalente aqui; a isenção por linha do
+#   Semgrep é `nosemgrep`, e nenhuma linha deste repositório precisa dela.
+rules:
+  - id: no-aws-instance-id
+    pattern-regex: '\bi-0[a-f0-9]{8,17}\b'
+    message: >-
+      Id de instância AWS com cara de real. Use o placeholder documentado i-0EXAMPLE.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      exclude:
+        - /tools/sanitize_scan.py
+        - /.semgrep/
+        - /.gitleaks.toml
+
+  - id: no-aws-account-id
+    patterns:
+      - pattern-regex: '\b\d{12}\b'
+      - pattern-not-regex: '\b0{12}\b'
+    message: >-
+      Valor de 12 dígitos no formato de conta AWS. Use 000000000000.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      exclude:
+        - /tools/sanitize_scan.py
+        - /.semgrep/
+        - /.gitleaks.toml
+
+  - id: no-brazilian-tax-id
+    pattern-regex: '\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b|\b\d{3}\.\d{3}\.\d{3}-\d{2}\b'
+    message: >-
+      Valor no formato de CNPJ ou CPF. Gere um sintético.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      exclude:
+        - /tools/sanitize_scan.py
+        - /.semgrep/
+        - /.gitleaks.toml
+
+  - id: no-private-ip
+    pattern-regex: '\b(?:10\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])|192\.168)\.\d{1,3}\.\d{1,3}\b'
+    message: >-
+      Endereço IP privado. Use as faixas de documentação da RFC 5737
+      (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24).
+    severity: ERROR
+    languages: [generic]
+    paths:
+      exclude:
+        - /tools/sanitize_scan.py
+        - /.semgrep/
+        - /.gitleaks.toml
