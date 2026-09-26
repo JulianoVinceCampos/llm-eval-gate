@@ -1,0 +1,107 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-eval-gate"
+version = "0.1.0"
+description = "CI gate that fails the pull request when LLM output quality regresses: three-valued statistical verdict, executable spec and a deterministic baseline to beat."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "Juliano Vince" }]
+keywords = ["llmops", "llm-evaluation", "quality-gate", "ci", "statistics", "sre", "mlops"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# Zero runtime dependencies, same rule as postmortem-miner (ADR-0001): the gate has to run
+# on a clean CI runner and on a locked-down laptop with nothing but a stdlib Python.
+dependencies = []
+
+[project.optional-dependencies]
+# Exact pins: the dev toolchain decides what the gate reports, so it does not float.
+dev = [
+  "pytest==9.1.1",
+  "pytest-cov==7.1.0",
+  "hypothesis==6.168.1",
+  "ruff==0.16.9",  # same pin as .github/workflows/lint.yml
+  "mypy==2.3.1",
+]
+
+[project.scripts]
+llm-eval-gate = "llm_eval_gate.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/JulianoVinceCampos/llm-eval-gate"
+Issues = "https://github.com/JulianoVinceCampos/llm-eval-gate/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/llm_eval_gate"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "tools"]
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "W",   # pycodestyle / pyflakes
+  "I",             # isort
+  "UP",            # pyupgrade
+  "B",             # bugbear
+  "SIM",           # simplify
+  "C4",            # comprehensions
+  "RET",           # return
+  "PTH",           # pathlib
+  "ARG",           # unused args
+  "PL",            # pylint subset
+  "S",             # bandit subset
+  "RUF",
+]
+# Argument, branch and return counts are style heuristics; validators and dispatchers
+# are naturally long and flat, and splitting them to please a counter hides the rules.
+ignore = ["PLR0911", "PLR0912", "PLR0913", "PLR0917", "PLR2004", "S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+  "llm_eval_gate", "coverage_ratchet", "sanitize_scan", "check_typography", "tasks", "helpers",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ARG001", "ARG002", "S105", "S106", "S310", "PLC0415"]
+# Every command handler has the same (project, args) signature, used or not: it is what
+# lets the parser dispatch through one table.
+"src/llm_eval_gate/cli.py" = ["ARG001"]
+# The lexicon is data made of prose in two languages. Wrapping sentences to satisfy a
+# column limit makes the corpus harder to read and review, and the sentences are the data.
+"src/llm_eval_gate/datasets/families.py" = ["E501"]
+"src/llm_eval_gate/datasets/lexicon.py" = ["E501"]
+"src/llm_eval_gate/baseline/rules.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "tools"]
+warn_unreachable = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-q --strict-markers --strict-config"
+testpaths = ["tests"]
+pythonpath = ["src", "tools"]
+markers = ["slow: exercises the full statistical machinery, a few seconds each"]
+
+[tool.coverage.run]
+branch = true
+source = ["src/llm_eval_gate"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:", "raise NotImplementedError", "if TYPE_CHECKING:"]

@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+.coverage
+coverage.xml
+coverage.json
+htmlcov/
+dist/
+build/
+*.egg-info/
+out/
+# Local run artifacts. The gate re-derives runs in CI; only references and cassettes
+# are evidence, and those live under evals/.
+evals/runs/
+.env
+.env.*
+# Private denylist of organisation names for tools/sanitize_scan.py. It holds the very
+# names that must never be published, so it never enters the repository.
+.sanitize-denylist

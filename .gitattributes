@@ -1,0 +1,5 @@
+# Every artifact the gate hashes (datasets, references, cassettes, calibration) has to be
+# byte-identical on Linux CI and on a Windows laptop. A checkout that rewrites LF to CRLF
+# changes the sha256 and the gate refuses to compare, so line endings are pinned here.
+* text=auto eol=lf
+*.png binary
