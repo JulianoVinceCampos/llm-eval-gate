@@ -1,0 +1,15 @@
+[scenario]
+name = "equivalente"
+title = "Troca de modelo equivalente"
+story = "Mesma acurácia da referência, errando em parte casos diferentes. Passa porque o intervalo exclui uma perda maior que a margem."
+expected = "pass"
+
+[reference]
+seed = 1
+correlation = 1.0
+accuracy = { "in-dist" = 0.97, hard = 0.82 }
+
+[candidate]
+seed = 2
+correlation = 0.9
+accuracy = { "in-dist" = 0.97, hard = 0.82 }

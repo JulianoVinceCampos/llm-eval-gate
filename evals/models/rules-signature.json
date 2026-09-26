@@ -1,0 +1,53 @@
+{
+  "min_support": 0.6,
+  "rules_sha256": "e7b2048c3a362f485993f4b82ee5acc9854ed78b3aca12fef549939a9e86ef3e",
+  "signatures": {
+    "acl": [
+      "network.acl.block",
+      "network.healthcheck.fail"
+    ],
+    "cert": [
+      "lifecycle.cert.expired",
+      "network.timeout.external"
+    ],
+    "heap-oom": [
+      "resource.gc.pressure",
+      "resource.memory.exhausted",
+      "topology.single_node",
+      "workload.batch.window",
+      "workload.payload.large"
+    ],
+    "lb-app": [
+      "app.cast_error",
+      "app.npe",
+      "lifecycle.schedule.window",
+      "network.lb.imbalance",
+      "workload.traffic.spike"
+    ],
+    "pool-lock": [
+      "resource.cpu.saturated",
+      "saturation.pool.exhausted",
+      "saturation.pool.wait",
+      "store.lock.contention",
+      "topology.all_nodes"
+    ],
+    "retry-storm": [
+      "app.retry_storm",
+      "lifecycle.schedule.window",
+      "workload.batch.window",
+      "workload.traffic.spike"
+    ],
+    "rollback": [
+      "store.rollback.long",
+      "store.transaction.monolithic"
+    ],
+    "slow-query": [
+      "lifecycle.schedule.window",
+      "resource.cpu.saturated",
+      "store.query.slow"
+    ]
+  },
+  "threshold": 0.3,
+  "train_sha256": "8ed095264c3e35e8a499050cd9fddfeebb93a1914edd87246972e534958728a6",
+  "version": 1
+}

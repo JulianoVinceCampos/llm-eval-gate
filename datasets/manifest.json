@@ -1,0 +1,57 @@
+{
+  "eval_sha256": "4201137aae6671816478229f727070d0ad4a7bccf5ce8ca7495c60ce7fa15dbb",
+  "generator_version": 1,
+  "splits": {
+    "hard": {
+      "count": 300,
+      "hard": true,
+      "labels": {
+        "acl": 30,
+        "cert": 30,
+        "heap-oom": 30,
+        "lb-app": 30,
+        "none": 60,
+        "pool-lock": 30,
+        "retry-storm": 30,
+        "rollback": 30,
+        "slow-query": 30
+      },
+      "seed": 303,
+      "sha256": "fa50765faedeb3f9cd4c473cb5fac379d63da6026f93863e1fcd6e750885921b"
+    },
+    "in-dist": {
+      "count": 200,
+      "hard": false,
+      "labels": {
+        "acl": 20,
+        "cert": 20,
+        "heap-oom": 20,
+        "lb-app": 20,
+        "none": 40,
+        "pool-lock": 20,
+        "retry-storm": 20,
+        "rollback": 20,
+        "slow-query": 20
+      },
+      "seed": 202,
+      "sha256": "6647827243293075dd52d21432e0d9a8b6a6d606e01d5384a92919e4d06878c5"
+    },
+    "train": {
+      "count": 120,
+      "hard": false,
+      "labels": {
+        "acl": 12,
+        "cert": 12,
+        "heap-oom": 12,
+        "lb-app": 12,
+        "none": 24,
+        "pool-lock": 12,
+        "retry-storm": 12,
+        "rollback": 12,
+        "slow-query": 12
+      },
+      "seed": 101,
+      "sha256": "8ed095264c3e35e8a499050cd9fddfeebb93a1914edd87246972e534958728a6"
+    }
+  }
+}

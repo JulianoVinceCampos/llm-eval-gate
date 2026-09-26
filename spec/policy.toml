@@ -1,0 +1,27 @@
+# Política de regressão do gate. Ver docs/metodologia-estatistica.md e ADR-0002.
+#
+# margin: perda máxima tolerada contra a referência (3 p.p.). O gate passa quando o
+#   intervalo exclui uma perda maior que a margem, reprova quando exclui que a perda caiba
+#   nela, e fica inconclusivo quando os dados não dizem.
+# alpha: nível unilateral de cada lado do intervalo (intervalo bilateral de 90%).
+# method: "tango" (score de Tango, 1998) decide o gate. "agresti-min" (Wald+2) e
+#   "bootstrap" (percentil) existem como braços de comparação da calibração, que mede por
+#   que eles não decidem.
+# resamples e seed: só valem para method = "bootstrap".
+# on_inconclusive: "fail" bloqueia o PR quando o dado não sustenta nenhuma conclusão.
+#
+# Consequência de dimensionamento: com margem de 3 p.p. e alfa 0,05, mesmo um candidato
+# idêntico à referência só passa com pelo menos 88 casos pareados por split, porque zero
+# discordância em menos casos ainda não exclui uma perda de 3 p.p.
+
+[regression]
+alpha = 0.05
+margin = 0.03
+method = "tango"
+resamples = 2000
+seed = 1729
+splits = ["in-dist", "hard"]
+on_inconclusive = "fail"
+
+[coverage]
+require_evidence = true

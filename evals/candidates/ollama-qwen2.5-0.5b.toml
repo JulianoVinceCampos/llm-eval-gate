@@ -1,0 +1,42 @@
+# LLM local via Ollama. Sem chave de API: qualquer pessoa reproduz o número.
+#
+# temperature 0.2 de propósito: com 0 a decodificação é gulosa, as repetições saem iguais
+# e a instabilidade medida é zero por construção, o que não mede nada. Cada repetição usa
+# seed + índice da repetição.
+#
+# A cassette é gravada pelo workflow live-eval (modo record) e reproduzida em todo PR.
+# Enquanto ela não existe, o candidato aparece como pendente e não bloqueia. Depois que
+# existe uma referência aceita, apagar a cassette reprova o gate.
+#
+# Amostra de 50%, e não menos: 100 casos in-dist e 150 hard. Com a margem de 3 p.p. o
+# teste de não inferioridade precisa de pelo menos 88 casos pareados por split para
+# aprovar até um replay idêntico à referência (ver spec/policy.toml).
+
+[candidate]
+name = "ollama-qwen2.5-0.5b"
+stage = "experimental"
+description = "Qwen2.5 0.5B instruct via Ollama local, temperatura 0.2, três repetições por caso, amostra estratificada de 50%."
+
+[classifier]
+kind = "llm"
+provider = "ollama"
+model = "qwen2.5:0.5b"
+prompt = "prompts/classify-v1.toml"
+cassette = "evals/cassettes/ollama-qwen2.5-0.5b.jsonl"
+temperature = 0.2
+seed = 7
+max_tokens = 96
+repeats = 3
+timeout_s = 120
+
+[sample]
+fraction = 0.5
+seed = 11
+
+[budget]
+max_calls = 1000
+max_tokens = 1500000
+
+[prices]
+input_per_mtok_usd = 0.10
+output_per_mtok_usd = 0.40

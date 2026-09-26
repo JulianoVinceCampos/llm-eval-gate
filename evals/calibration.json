@@ -1,0 +1,572 @@
+{
+  "cells": [
+    {
+      "effect": 0.0,
+      "fail": 1,
+      "inconclusive": 393,
+      "method": "tango",
+      "n": 20,
+      "pass": 6,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 394,
+      "method": "agresti-min",
+      "n": 20,
+      "pass": 6,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 5,
+      "inconclusive": 157,
+      "method": "bootstrap",
+      "n": 20,
+      "pass": 238,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 3,
+      "inconclusive": 395,
+      "method": "tango",
+      "n": 20,
+      "pass": 2,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 0,
+      "inconclusive": 398,
+      "method": "agresti-min",
+      "n": 20,
+      "pass": 2,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 17,
+      "inconclusive": 206,
+      "method": "bootstrap",
+      "n": 20,
+      "pass": 177,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 5,
+      "inconclusive": 395,
+      "method": "tango",
+      "n": 20,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 0,
+      "inconclusive": 400,
+      "method": "agresti-min",
+      "n": 20,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 21,
+      "inconclusive": 249,
+      "method": "bootstrap",
+      "n": 20,
+      "pass": 130,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 25,
+      "inconclusive": 372,
+      "method": "tango",
+      "n": 20,
+      "pass": 3,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 6,
+      "inconclusive": 391,
+      "method": "agresti-min",
+      "n": 20,
+      "pass": 3,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 66,
+      "inconclusive": 265,
+      "method": "bootstrap",
+      "n": 20,
+      "pass": 69,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 89,
+      "inconclusive": 311,
+      "method": "tango",
+      "n": 20,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 48,
+      "inconclusive": 352,
+      "method": "agresti-min",
+      "n": 20,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 156,
+      "inconclusive": 230,
+      "method": "bootstrap",
+      "n": 20,
+      "pass": 14,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 352,
+      "method": "tango",
+      "n": 50,
+      "pass": 48,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 308,
+      "method": "agresti-min",
+      "n": 50,
+      "pass": 92,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 266,
+      "method": "bootstrap",
+      "n": 50,
+      "pass": 134,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 9,
+      "inconclusive": 365,
+      "method": "tango",
+      "n": 50,
+      "pass": 26,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 3,
+      "inconclusive": 352,
+      "method": "agresti-min",
+      "n": 50,
+      "pass": 45,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 8,
+      "inconclusive": 316,
+      "method": "bootstrap",
+      "n": 50,
+      "pass": 76,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 24,
+      "inconclusive": 368,
+      "method": "tango",
+      "n": 50,
+      "pass": 8,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 4,
+      "inconclusive": 377,
+      "method": "agresti-min",
+      "n": 50,
+      "pass": 19,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 23,
+      "inconclusive": 341,
+      "method": "bootstrap",
+      "n": 50,
+      "pass": 36,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 61,
+      "inconclusive": 338,
+      "method": "tango",
+      "n": 50,
+      "pass": 1,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 32,
+      "inconclusive": 365,
+      "method": "agresti-min",
+      "n": 50,
+      "pass": 3,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 61,
+      "inconclusive": 331,
+      "method": "bootstrap",
+      "n": 50,
+      "pass": 8,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 218,
+      "inconclusive": 182,
+      "method": "tango",
+      "n": 50,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 180,
+      "inconclusive": 220,
+      "method": "agresti-min",
+      "n": 50,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 218,
+      "inconclusive": 182,
+      "method": "bootstrap",
+      "n": 50,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 287,
+      "method": "tango",
+      "n": 100,
+      "pass": 113,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 241,
+      "method": "agresti-min",
+      "n": 100,
+      "pass": 159,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 199,
+      "method": "bootstrap",
+      "n": 100,
+      "pass": 201,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 4,
+      "inconclusive": 354,
+      "method": "tango",
+      "n": 100,
+      "pass": 42,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 0,
+      "inconclusive": 337,
+      "method": "agresti-min",
+      "n": 100,
+      "pass": 63,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 0,
+      "inconclusive": 317,
+      "method": "bootstrap",
+      "n": 100,
+      "pass": 83,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 34,
+      "inconclusive": 348,
+      "method": "tango",
+      "n": 100,
+      "pass": 18,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 19,
+      "inconclusive": 353,
+      "method": "agresti-min",
+      "n": 100,
+      "pass": 28,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 21,
+      "inconclusive": 334,
+      "method": "bootstrap",
+      "n": 100,
+      "pass": 45,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 96,
+      "inconclusive": 303,
+      "method": "tango",
+      "n": 100,
+      "pass": 1,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 70,
+      "inconclusive": 324,
+      "method": "agresti-min",
+      "n": 100,
+      "pass": 6,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 74,
+      "inconclusive": 317,
+      "method": "bootstrap",
+      "n": 100,
+      "pass": 9,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 322,
+      "inconclusive": 78,
+      "method": "tango",
+      "n": 100,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 306,
+      "inconclusive": 94,
+      "method": "agresti-min",
+      "n": 100,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 308,
+      "inconclusive": 92,
+      "method": "bootstrap",
+      "n": 100,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 112,
+      "method": "tango",
+      "n": 300,
+      "pass": 288,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 105,
+      "method": "agresti-min",
+      "n": 300,
+      "pass": 295,
+      "trials": 400
+    },
+    {
+      "effect": 0.0,
+      "fail": 0,
+      "inconclusive": 86,
+      "method": "bootstrap",
+      "n": 300,
+      "pass": 314,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 0,
+      "inconclusive": 307,
+      "method": "tango",
+      "n": 300,
+      "pass": 93,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 0,
+      "inconclusive": 298,
+      "method": "agresti-min",
+      "n": 300,
+      "pass": 102,
+      "trials": 400
+    },
+    {
+      "effect": -0.015,
+      "fail": 0,
+      "inconclusive": 283,
+      "method": "bootstrap",
+      "n": 300,
+      "pass": 117,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 18,
+      "inconclusive": 359,
+      "method": "tango",
+      "n": 300,
+      "pass": 23,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 14,
+      "inconclusive": 359,
+      "method": "agresti-min",
+      "n": 300,
+      "pass": 27,
+      "trials": 400
+    },
+    {
+      "effect": -0.03,
+      "fail": 14,
+      "inconclusive": 352,
+      "method": "bootstrap",
+      "n": 300,
+      "pass": 34,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 217,
+      "inconclusive": 183,
+      "method": "tango",
+      "n": 300,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 199,
+      "inconclusive": 201,
+      "method": "agresti-min",
+      "n": 300,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.06,
+      "fail": 197,
+      "inconclusive": 203,
+      "method": "bootstrap",
+      "n": 300,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 398,
+      "inconclusive": 2,
+      "method": "tango",
+      "n": 300,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 398,
+      "inconclusive": 2,
+      "method": "agresti-min",
+      "n": 300,
+      "pass": 0,
+      "trials": 400
+    },
+    {
+      "effect": -0.12,
+      "fail": 397,
+      "inconclusive": 3,
+      "method": "bootstrap",
+      "n": 300,
+      "pass": 0,
+      "trials": 400
+    }
+  ],
+  "schema": 2,
+  "spec": {
+    "alpha": 0.05,
+    "correlation": 0.8,
+    "effects": [
+      0.0,
+      -0.015,
+      -0.03,
+      -0.06,
+      -0.12
+    ],
+    "margin": 0.03,
+    "methods": [
+      "tango",
+      "agresti-min",
+      "bootstrap"
+    ],
+    "reference_accuracy": 0.85,
+    "resamples": 500,
+    "seed": 2718,
+    "sizes": [
+      20,
+      50,
+      100,
+      300
+    ],
+    "trials": 400
+  }
+}

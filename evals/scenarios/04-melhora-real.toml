@@ -1,0 +1,15 @@
+[scenario]
+name = "melhora-real"
+title = "Melhora real de 8 p.p. não é bloqueada"
+story = "Um gate de regressão que atrapalha melhoria ensina o time a desligar o gate. Aqui o limite inferior fica acima da margem e passa."
+expected = "pass"
+
+[reference]
+seed = 1
+correlation = 1.0
+accuracy = { "in-dist" = 0.97, hard = 0.74 }
+
+[candidate]
+seed = 6
+correlation = 0.9
+accuracy = { "in-dist" = 0.97, hard = 0.82 }

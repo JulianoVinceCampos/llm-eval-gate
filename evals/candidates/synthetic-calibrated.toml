@@ -1,0 +1,29 @@
+# Não é um LLM. Modelo sintético com acurácia-alvo conhecida por construção, que exercita no
+# CI o caminho completo de um candidato amostrado: repetições, instabilidade, saída inválida,
+# latência e custo-sombra. Existe para que a régua rode inteira em todo PR, inclusive antes
+# de existir a primeira gravação de um modelo de verdade.
+#
+# A acurácia configurada é a esperada, não a medida: a dificuldade de cada caso sai de um
+# hash do id, então o valor medido varia com os casos do split, como varia com um modelo real.
+
+[candidate]
+name = "synthetic-calibrated"
+stage = "experimental"
+description = "Modelo sintético com acurácia-alvo conhecida (não é LLM). Exercita no CI repetições, instabilidade e saída inválida."
+
+[classifier]
+kind = "synthetic"
+repeats = 3
+instability = 0.06
+invalid_rate = 0.004
+correlation = 0.85
+latency_ms = 380
+seed = 5
+
+[classifier.accuracy]
+"in-dist" = 0.97
+hard = 0.81
+
+[prices]
+input_per_mtok_usd = 0.10
+output_per_mtok_usd = 0.40

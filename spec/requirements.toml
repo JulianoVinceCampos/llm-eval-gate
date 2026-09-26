@@ -1,0 +1,178 @@
+# Spec executável do classificador de padrão de incidente.
+#
+# Cada requisito é avaliado pelo gate e aparece na matriz de rastreabilidade, com os casos
+# que puxam o número para baixo. `enforcement = "block"` vale para candidatos em produção;
+# `report` é meta medida e publicada, que não bloqueia. Um requisito sem casos de evidência
+# reprova (coverage.require_evidence em policy.toml): spec sem evidência é lista de desejos.
+
+[meta]
+id = "triage-classifier"
+version = "1.0.0"
+title = "Classificador de padrão de incidente para triagem"
+
+# --- bloqueiam candidato em produção -------------------------------------------------
+
+[[requirement]]
+id = "REQ-001"
+title = "Acertar o caso conhecido"
+rationale = "No vocabulário do próprio template, o classificador de produção não pode errar. Queda aqui é regressão básica, não robustez."
+split = "in-dist"
+metric = "accuracy"
+op = ">="
+threshold = 0.95
+evidence = "lower"
+enforcement = "block"
+
+[[requirement]]
+id = "REQ-002"
+title = "Resposta sempre em formato válido"
+rationale = "Saída fora do formato vira falha na automação que consome o rótulo."
+split = "hard"
+metric = "format_valid_rate"
+op = ">="
+threshold = 0.99
+enforcement = "block"
+
+[[requirement]]
+id = "REQ-003"
+title = "Estabilidade entre execuções"
+rationale = "O mesmo incidente classificado de novo não pode trocar de padrão com frequência. Instabilidade é defeito, não característica."
+split = "hard"
+metric = "instability_rate"
+op = "<="
+threshold = 0.10
+enforcement = "block"
+
+[[requirement]]
+id = "REQ-004"
+title = "Latência de triagem"
+rationale = "A classificação entra no minuto três do incidente. p95 acima de 5 s atrasa a primeira decisão."
+split = "hard"
+metric = "latency_p95_ms"
+op = "<="
+threshold = 5000
+enforcement = "block"
+
+[[requirement]]
+id = "REQ-005"
+title = "Custo por chamada"
+rationale = "Custo-sombra por classificação, para que trocar de modelo não mude a conta sem que ninguém veja."
+split = "hard"
+metric = "cost_per_call_usd"
+op = "<="
+threshold = 0.0005
+enforcement = "block"
+
+# --- metas de robustez: medidas e publicadas, não bloqueiam --------------------------
+
+[[requirement]]
+id = "REQ-010"
+title = "Robustez a mudança de vocabulário"
+rationale = "O mesmo incidente descrito sem o vocabulário do template. É aqui que regra por palavra-chave cai."
+split = "hard"
+metric = "accuracy"
+op = ">="
+threshold = 0.80
+evidence = "lower"
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-011"
+title = "Macro-F1 no split difícil"
+rationale = "Acurácia esconde classe esquecida; macro-F1 pesa as nove classes por igual."
+split = "hard"
+metric = "macro_f1"
+op = ">="
+threshold = 0.75
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-012"
+title = "Não inventar padrão em incidente pontual"
+rationale = "Incidente sem padrão classificado como recorrente manda o plantão para o runbook errado."
+split = "hard"
+metric = "recall"
+label = "none"
+op = ">="
+threshold = 0.80
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-013"
+title = "Reconhecer pool esgotado com lock"
+split = "hard"
+metric = "recall"
+label = "pool-lock"
+op = ">="
+threshold = 0.70
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-014"
+title = "Reconhecer estouro de heap"
+split = "hard"
+metric = "recall"
+label = "heap-oom"
+op = ">="
+threshold = 0.70
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-015"
+title = "Reconhecer tempestade de retry"
+split = "hard"
+metric = "recall"
+label = "retry-storm"
+op = ">="
+threshold = 0.70
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-016"
+title = "Reconhecer rollback longo"
+split = "hard"
+metric = "recall"
+label = "rollback"
+op = ">="
+threshold = 0.70
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-017"
+title = "Reconhecer certificado expirado"
+split = "hard"
+metric = "recall"
+label = "cert"
+op = ">="
+threshold = 0.70
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-018"
+title = "Reconhecer bloqueio de rede"
+split = "hard"
+metric = "recall"
+label = "acl"
+op = ">="
+threshold = 0.70
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-019"
+title = "Reconhecer desbalanceamento com bug de aplicação"
+split = "hard"
+metric = "recall"
+label = "lb-app"
+op = ">="
+threshold = 0.70
+enforcement = "report"
+
+[[requirement]]
+id = "REQ-020"
+title = "Reconhecer query lenta após manutenção"
+split = "hard"
+metric = "recall"
+label = "slow-query"
+op = ">="
+threshold = 0.70
+enforcement = "report"

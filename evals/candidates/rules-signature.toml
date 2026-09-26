@@ -1,0 +1,8 @@
+[candidate]
+name = "rules-signature"
+stage = "production"
+description = "Baseline determinístico: as 31 regras do postmortem-miner e o classificador por assinatura, ajustado só no split de treino."
+
+[classifier]
+kind = "rules"
+model = "evals/models/rules-signature.json"
