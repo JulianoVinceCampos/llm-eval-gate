@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Gate de CI que reprova o PR quando a qualidade da saída do LLM regride.">
+  <title>llm-eval-gate</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true"></span>llm-eval-gate</div>
+    <nav id="tabs" class="tabs" role="tablist" aria-label="Seções do painel" hidden>
+      <button role="tab" data-view="overview" aria-selected="true">Visão geral</button>
+      <button role="tab" data-view="gate" aria-selected="false">Gate</button>
+      <button role="tab" data-view="whatif" aria-selected="false">E se?</button>
+      <button role="tab" data-view="compare" aria-selected="false">Regras x LLM</button>
+      <button role="tab" data-view="trace" aria-selected="false">Rastreabilidade</button>
+      <button role="tab" data-view="cases" aria-selected="false">Casos</button>
+      <button role="tab" data-view="calibration" aria-selected="false">Calibração</button>
+      <button role="tab" data-view="about" aria-selected="false">Sobre</button>
+    </nav>
+    <button id="logout" class="ghost" type="button" hidden>Sair</button>
+  </header>
+
+  <main id="main">
+    <section id="login" class="login" hidden aria-labelledby="login-title">
+      <h1 id="login-title">Entrar no painel</h1>
+      <p class="muted">Portão de demonstração sobre dado sintético e somente leitura. Usuário
+        <code>julianovincedecampos</code>, senha <code>llm-eval-gate</code>.</p>
+      <form id="login-form" autocomplete="on">
+        <label for="login-user">Usuário</label>
+        <input id="login-user" name="user" autocomplete="username" required>
+        <label for="login-password">Senha</label>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Entrar</button>
+        <p id="login-error" class="error" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="view-overview" class="view" role="tabpanel" aria-label="Visão geral" hidden></section>
+    <section id="view-gate" class="view" role="tabpanel" aria-label="Gate" hidden></section>
+    <section id="view-whatif" class="view" role="tabpanel" aria-label="E se" hidden></section>
+    <section id="view-compare" class="view" role="tabpanel" aria-label="Regras x LLM" hidden></section>
+    <section id="view-trace" class="view" role="tabpanel" aria-label="Rastreabilidade" hidden></section>
+    <section id="view-cases" class="view" role="tabpanel" aria-label="Casos" hidden></section>
+    <section id="view-calibration" class="view" role="tabpanel" aria-label="Calibração" hidden></section>
+    <section id="view-about" class="view" role="tabpanel" aria-label="Sobre" hidden>
+      <h1>Por que este gate existe</h1>
+      <p>Todo mundo publica wrapper de LLM. Quase ninguém publica a régua. Este painel mostra a
+        régua funcionando: cada candidato é comparado caso a caso contra uma referência aceita,
+        e o veredito tem três estados. <strong>Passa</strong> quando o intervalo exclui uma perda
+        maior que a margem, <strong>reprova</strong> quando exclui que a perda caiba nela, e fica
+        <strong>inconclusivo</strong> quando os dados não dizem.</p>
+      <p>A régua também é medida: a calibração simula milhares de trocas de modelo com efeito
+        conhecido e publica quantas vezes o gate erra. O intervalo que decide é o score de
+        Tango, escolhido porque o bootstrap percentil, muito usado em avaliação, aprova regressão
+        que não enxerga quando há poucos casos.</p>
+      <p>O baseline é determinístico e vem antes de qualquer IA: as 31 regras do
+        postmortem-miner com um classificador por assinatura. O LLM só entra medido contra ele.</p>
+      <p>Tudo aqui é sintético e gerado por código versionado. Nada vem de sistema, cliente ou
+        colega real.</p>
+      <p><a href="https://github.com/JulianoVinceCampos/llm-eval-gate" rel="noopener">Código, metodologia e ADRs no GitHub</a></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span id="version"></span>
+    <span>Dado sintético. Somente leitura.</span>
+  </footer>
+</body>
+</html>
