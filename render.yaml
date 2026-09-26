@@ -1,0 +1,26 @@
+# Blueprint de deploy. O Render lê este arquivo e cria o serviço sozinho.
+#
+# A porta não aparece aqui de propósito: a plataforma injeta PORT e o default da CLI lê
+# PORT do ambiente. Um número fixo aqui seria uma segunda fonte de verdade.
+#
+# autoDeployTrigger: checksPass faz o deploy esperar os checks do commit passarem. Um
+# commit que reprova o próprio gate não vai para o ar.
+services:
+  - type: web
+    name: llm-eval-gate
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    envVars:
+      # O Render termina TLS e repassa X-Forwarded-Proto: com isto o cookie sai Secure e a
+      # resposta leva HSTS.
+      - key: LEG_TRUST_PROXY
+        value: "1"
+      - key: LEG_USER
+        value: julianovincedecampos
+      # sync: false mantém o valor fora do repositório; preenche-se no painel. Sem valor,
+      # vale o default documentado do portão de demonstração.
+      - key: LEG_PASSWORD
+        sync: false

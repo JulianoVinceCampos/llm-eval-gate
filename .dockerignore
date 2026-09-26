@@ -1,0 +1,12 @@
+# Allowlist, not blocklist: the image gets exactly what the Dockerfile copies.
+*
+!src/
+!datasets/
+!evals/
+!spec/
+!prompts/
+
+# Never ship local run artifacts or caches, even under an allowed directory.
+evals/runs/
+**/__pycache__/
+**/*.py[cod]

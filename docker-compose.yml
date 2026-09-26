@@ -1,0 +1,20 @@
+# Local run of the same image the deploy uses: http://127.0.0.1:8000
+services:
+  dashboard:
+    build: .
+    image: llm-eval-gate:local
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      # Demo credentials, overridable. The gate is enforced on the server either way.
+      LEG_USER: julianovincedecampos
+      LEG_PASSWORD: llm-eval-gate
+    # The dashboard only reads: the filesystem can be read-only and the process needs no
+    # capability at all.
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
